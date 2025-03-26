@@ -76,7 +76,7 @@ def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
-    compileSdkVersion 33
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
     namespace "com.taxirn"
     defaultConfig {
@@ -118,11 +118,20 @@ dependencies {
         implementation jscFlavor
     }
 
-    implementation 'io.grpc:grpc-okhttp:1.42.1'
-    implementation 'io.grpc:grpc-protobuf-lite:1.42.1'
-    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+    implementation 'io.grpc:grpc-okhttp:1.53.0'
+    implementation 'io.grpc:grpc-protobuf-lite:1.53.0'
+    implementation 'io.grpc:grpc-stub:1.53.0'
+    
+    implementation 'com.google.protobuf:protobuf-javalite:3.21.7'
+    
     implementation "org.jetbrains.kotlin:kotlin-stdlib:${rootProject.ext.kotlinVersion}"
-    implementation 'com.google.protobuf:protobuf-java:3.21.7'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+
+    configurations.all {
+        resolutionStrategy {
+            exclude group: 'com.google.protobuf', module: 'protobuf-java'
+        }
+    }
 }
 
 protobuf {
@@ -131,16 +140,20 @@ protobuf {
     }
     plugins {
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.42.1'
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.53.0'
         }
     }
     generateProtoTasks {
         all().each { task ->
             task.plugins {
-                grpc {}
+                grpc {
+                    option 'lite'
+                }
             }
             task.builtins {
-                java {}
+                java {
+                    option 'lite'
+                }
             }
         }
     }
